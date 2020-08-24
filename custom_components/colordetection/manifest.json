@@ -8,6 +8,7 @@
         "@marklester"
     ],
     "requirements": [
-        "pillow"
+        "pillow",
+        "colorthief"
     ]
 }

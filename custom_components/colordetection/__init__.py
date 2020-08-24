@@ -18,9 +18,11 @@ from homeassistant.core import split_entity_id
 from homeassistant.helpers import template
 import homeassistant.helpers.config_validation as cv
 
+from colorthief import ColorThief
+
 _LOGGER = logging.getLogger(__name__)
 
-CONF_COLOR_COUNT = "colors"
+CONF_COLOR_COUNT = "color_count"
 CONF_QUALITY = "quality"
 
 
@@ -81,11 +83,13 @@ class ColorDetectionEntity(ImageProcessingEntity):
 
     def process_image(self, image):
         """Process the image."""
-        # color_thief = ColorThief(image)
+        color_thief = ColorThief(image)
 
         # Run detection
         start = time.monotonic()
-        response = {}
+        response = color_thief.get_palette(
+            color_count=self._color_count, quality=self._quality
+        )
         _LOGGER.debug(
             "colordetect: response: %s duration: %s",
             response,
