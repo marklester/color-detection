@@ -1,12 +1,14 @@
-# Notice
+# Color Detection Component
+This component will take an image source and return the primary colors from that image.
 
-The component and platforms in this repository are not meant to be used by a
-user, but as a "blueprint" that custom component developers can build
-upon, to make more awesome stuff.
-
-This blueprint uses ['sampleclient'](https://github.com/ludeeus/sampleclient) to simulate what you actually might use in your integration.
-
-HAVE FUN! 😎
+```yaml
+image_processing:
+  - platform: color-detection
+    source:
+      - entity_id: camera.front
+    colors: 5
+    quality: 5
+```
 
 ## Why?
 
