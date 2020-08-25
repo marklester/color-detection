@@ -38,7 +38,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    add_entities([ColorDetectionSensor(hass, config)])
+    entity = [ColorDetectionSensor(hass, config)]
+    _LOGGER.error(f"creating entity {entity}")
+    add_entities(entity)
 
 
 class ColorDetectionSensor(Entity):
@@ -47,15 +49,21 @@ class ColorDetectionSensor(Entity):
     def __init__(self, hass, entity_config):
         """Initialize the sensor."""
         self._state = None
-        self._attributes = {}
         self._entity_id = entity_config[CONF_SOURCE]
         self._color_count = entity_config[CONF_COLOR_COUNT]
         self._quality = entity_config[CONF_QUALITY]
+        self._attributes = {
+            CONF_SOURCE: self._entity_id,
+            CONF_COLOR_COUNT:  self._color_count,
+            CONF_QUALITY: self._quality
+        }
+
+        self._unique_id = f'{DOMAIN}_{self._entity_id}'
 
     @ property
     def name(self):
         """Return the name of the sensor."""
-        return f'Color Detection for {self._entity_id}'
+        return self._unique_id
 
     @ property
     def state(self):
@@ -73,23 +81,24 @@ class ColorDetectionSensor(Entity):
         return None
 
     def update(self):
+        self._attributes.pop("error", None)
         source = self.hass.states.get(self._entity_id)
-        # self._attributes = source
         _LOGGER.debug(source)
         instance_url = "localhost:8123"
 
         pic_path = source.attributes["entity_picture"]
         fullurl = f"http://{instance_url}{pic_path}"
-
+        self._attributes["path"] = pic_path
         try:
             fd = urlopen(fullurl)
             with io.BytesIO(fd.read()) as f:
                 color_thief = ColorThief(f)
                 palette = color_thief.get_palette(
-                    color_count=self._color_count, quality=self._quality
+                    color_count=self._attributes[CONF_COLOR_COUNT], quality=self._attributes[CONF_QUALITY]
                 )
-                for color in palette:
-                    self._attributes["palette"] = palette
-                _LOGGER.error(self._attributes)
+                self._attributes["palette"] = palette
+                self._state = "observing"
+                _LOGGER.debug(self._attributes)
         except HTTPError as e:
-            _LOGGER.error(e)
+            self._attributes["error"] = f"{e}"
+            _LOGGER.debug(f"error occurred looking up {fullurl} error {e}")
