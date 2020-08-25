@@ -3,12 +3,8 @@
     "name": "Color Detection",
     "documentation": "https://github.com/marklester/color-detection",
     "dependencies": [],
-    "config_flow": false,
-    "codeowners": [
-        "@marklester"
-    ],
+    "codeowners": [],
     "requirements": [
-        "pillow",
         "colorthief"
     ]
 }
